@@ -1,0 +1,99 @@
+/* sustilizuoti checkboxa */
+
+#custom-size-form {
+    #custom-field-btn {
+        cursor: pointer;
+        border: 1px solid #babfc3;
+        padding: 5px 15px;
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 0px 0px;
+        &:hover {
+            background: #f6f6f7;
+        }
+    
+    }
+    
+}
+
+.measurment {
+    position: absolute;
+}
+
+// $groups: 
+//     "1" red,
+//     "2" orange,
+//     "3" yellow,
+//     "4" green,
+//     "5" lightblue,
+//     "6" blue,
+//     "7" purple;
+
+@function hslColor($hue: 0, $saturation: 100%, $lightness: 50%) {
+    @return hsl($hue, $saturation, $lightness);
+  }
+
+
+#rectangles-form {
+    width: auto;
+    display: grid;
+    gap: 1px;
+
+    input[type="checkbox"] {
+        display: inline-block; 
+        margin: 0px;
+        height: 50px;
+        width: 50px;
+        position: relative;
+        cursor: pointer;
+        appearance: none;
+        background-color: #EEF0E5;
+
+        // @each $group, $color in $groups {
+        //     &[data-group="#{$group}"] {
+        //         background-color: $color;
+        //     }
+        // }
+        @for $i from 1 through 20 {
+            &[data-group="#{$i}"] {
+                $color: hslColor($hue: $i * 15, $lightness: 60%);
+                background-color: $color;
+            }
+        }
+
+        
+        // &::before {
+        //     content: '';
+        //     position: absolute;
+        //     display: block;
+        //     // top: 50%;
+        //     // left: 50%;
+        //     // transform: translate(-50%, -50%);
+        //     height: 100%;
+        //     width: 100%;
+        //     background-color: #EEF0E5;
+        // }
+        &:checked {
+            border: 1px solid black;
+            
+            &.top {
+                border-top: none;
+            }
+            &.bottom {
+                border-bottom: none;
+            } 
+            &.right {
+                border-right: none;
+            } 
+            &.left {
+                border-left: none;
+            } 
+            // &::before {
+            //     content: '';
+            //     height: 100%;
+            //     width: 100%;
+            //     background-color: inherit;
+            // }
+        }
+    }
+}
