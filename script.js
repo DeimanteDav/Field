@@ -38,6 +38,7 @@ function getDataFromLocalStorage(rectanglesForm, perimeterText, areaText) {
     
         }
     }
+   
 }
 getDataFromLocalStorage(rectanglesForm, perimeterText, areaText)
 
