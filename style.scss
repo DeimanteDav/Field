@@ -1,99 +1,188 @@
-/* sustilizuoti checkboxa */
+.container {
+    max-width: 1100px;
+    margin: 20px auto;
+    padding-left: 20px;
+    padding-right: 20px;
 
-#custom-size-form {
-    #custom-field-btn {
-        cursor: pointer;
-        border: 1px solid #babfc3;
-        padding: 5px 15px;
-        background: #ffffff;
-        border-radius: 4px;
-        box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 0px 0px;
-        &:hover {
-            background: #f6f6f7;
-        }
+
+    #custom-size-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        border: 1px solid black;
+        border-radius: 5px;
+        padding: 30px;
+        width: fit-content;
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+
+            .form-control {
+                label {
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                }
     
+                input {
+                    padding: 3px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                }
+            }
+        }
+
+        #custom-field-btn {
+            cursor: pointer;
+            border: 1px solid #babfc3;
+            padding: 5px 15px;
+            background: #ffffff;
+            border-radius: 4px;
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 0px 0px;
+            transition: background-color 0.3s;
+
+            &:hover {
+                background: #f6f6f7;
+            }
+        }
     }
     
-}
+    @function hslColor($hue: 0, $saturation: 100%, $lightness: 50%) {
+        @return hsl($hue, $saturation, $lightness);
+    }
 
-.measurment {
-    position: absolute;
-}
-
-// $groups: 
-//     "1" red,
-//     "2" orange,
-//     "3" yellow,
-//     "4" green,
-//     "5" lightblue,
-//     "6" blue,
-//     "7" purple;
-
-@function hslColor($hue: 0, $saturation: 100%, $lightness: 50%) {
-    @return hsl($hue, $saturation, $lightness);
-  }
-
-
-#rectangles-form {
-    width: auto;
-    display: grid;
-    gap: 1px;
-
-    input[type="checkbox"] {
-        display: inline-block; 
-        margin: 0px;
-        height: 50px;
-        width: 50px;
-        position: relative;
-        cursor: pointer;
-        appearance: none;
-        background-color: #EEF0E5;
-
-        // @each $group, $color in $groups {
-        //     &[data-group="#{$group}"] {
-        //         background-color: $color;
-        //     }
-        // }
-        @for $i from 1 through 20 {
-            &[data-group="#{$i}"] {
-                $color: hslColor($hue: $i * 15, $lightness: 60%);
-                background-color: $color;
+    #rectangles-form {
+        width: auto;
+        display: grid;
+        gap: 1px;
+    
+        .measurment {
+            pointer-events: none;
+            font-size: 13px;
+    
+            &.row {
+                justify-self: center;
+    
+                &.top {
+                    align-self: end;
+        
+                    
+                }
+                &.bottom {
+                    align-self: start;
+                }
+            }
+            &.column {
+                align-self: center;
+                &.top {
+                    justify-self: end;
+                    transform: rotate(-90deg);
+                }
+    
+                &.bottom {
+                    justify-self: start;
+                    transform: rotate(90deg);
+                }
+    
             }
         }
-
-        
-        // &::before {
-        //     content: '';
-        //     position: absolute;
-        //     display: block;
-        //     // top: 50%;
-        //     // left: 50%;
-        //     // transform: translate(-50%, -50%);
-        //     height: 100%;
-        //     width: 100%;
-        //     background-color: #EEF0E5;
-        // }
-        &:checked {
-            border: 1px solid black;
-            
-            &.top {
-                border-top: none;
+    
+        input[type="checkbox"] {
+            display: inline-block; 
+            margin: 0px;
+            height: 50px;
+            width: 50px;
+            cursor: pointer;
+            appearance: none;
+            background-color: #EEF0E5;
+    
+    
+            @for $i from 1 through 20 {
+                &[data-group="#{$i}"] {
+                    $color: hslColor($hue: $i * 15, $lightness: 60%);
+                    background-color: $color;
+                }
             }
-            &.bottom {
-                border-bottom: none;
-            } 
-            &.right {
-                border-right: none;
-            } 
-            &.left {
-                border-left: none;
-            } 
+    
+            
             // &::before {
             //     content: '';
+            //     position: absolute;
+            //     display: block;
+            //     // top: 50%;
+            //     // left: 50%;
+            //     // transform: translate(-50%, -50%);
             //     height: 100%;
             //     width: 100%;
-            //     background-color: inherit;
+            //     background-color: #EEF0E5;
             // }
+            &:checked {
+                border: 1px solid black;
+                
+                &.top {
+                    border-top: none;
+                }
+                &.bottom {
+                    border-bottom: none;
+                } 
+                &.right {
+                    border-right: none;
+                } 
+                &.left {
+                    border-left: none;
+                } 
+                // &::before {
+                //     content: '';
+                //     height: 100%;
+                //     width: 100%;
+                //     background-color: inherit;
+                // }
+            }
+        }
+    }
+
+    #parameters {
+        margin: 20px 0;
+    }
+    
+    .parameters-text {
+        p {
+            font-weight: bold;
+            margin: 10px 0;
+
+            span {
+                font-weight: 500;
+                color: #424242;
+            }
+        }
+    }
+
+    #groups-parameters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+
+        .group-parameters {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+
+            
+            .group-grid {
+                display: grid;
+                gap: 1px;
+                input[type="checkbox"] {
+                    display: inline-block; 
+                    appearance: none;
+                    margin: 0;
+                }
+            }
         }
     }
 }

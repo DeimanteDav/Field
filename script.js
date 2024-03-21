@@ -1,56 +1,62 @@
 const fieldSizeForm = document.getElementById('custom-size-form')
 let rectanglesForm = document.getElementById('rectangles-form')
-let resetBtn = document.getElementById('reset-btn')
 let perimeterText = document.getElementById('perimeter');
 let areaText = document.getElementById('area')
 
-function getDataFromLocalStorage(rectanglesForm, perimeterText, areaText) {
+function getDataFromLocalStorage(rectanglesForm) {
     const parameters = JSON.parse(localStorage.getItem('parameters'))
-    const rectanglesFormData = JSON.parse(localStorage.getItem('rectangles-form'))
-    const rectanglesFormStyle = JSON.parse(localStorage.getItem('rectangles-form-style'))
-    const perimeter = JSON.parse(localStorage.getItem('perimeter'))
-    const area = JSON.parse(localStorage.getItem('area'))
+    const rowsData = JSON.parse(localStorage.getItem('rows'))
+
+    if (rowsData && parameters) {
+        const columnsElements = fieldSizeForm.querySelectorAll(`input[name=columns]`)
+        const rowsElements = fieldSizeForm.querySelectorAll(`input[name=rows]`)
+
+        columnsElements.forEach(column => {column.value = parameters.columns})
+
+        rowsElements.forEach(row => {row.value = parameters.rows})
 
 
-    if (rectanglesFormData && rectanglesFormStyle) {
-        rectanglesForm.innerHTML = rectanglesFormData
-        let checkedInputs = rectanglesForm.querySelectorAll('[data-group]')
-        console.log(checkedInputs);
-        checkedInputs.forEach(input => {
-            input.checked = true
-        })
+        for (let i = 0; i < rowsData.length; i++) {
+            const row = rowsData[i];
 
-        const formStyle = JSON.parse(localStorage.getItem('rectangles-form-style'))
-    
-        rectanglesForm.style.gridTemplateColumns = formStyle.columns
-        rectanglesForm.style.gridTemplateRows = formStyle.rows
-        rectanglesForm.style.width = formStyle.width
+            for (let j = 0; j < row.length; j++) {
+                const field = row[j];
+                const input = document.createElement('input')
+                
+                const rowNum = i + 2
+                const columnNum = j + 2
+                input.setAttribute('type', 'checkbox')
+                input.dataset.row = rowNum
+                input.dataset.column = columnNum
+                input.style.gridColumn = columnNum
+                input.style.gridRow = rowNum
 
-        if (perimeter) {
-            perimeterText.textContent = perimeter
+                if (field > 0) {
+                    input.checked = true
+                }
+                rectanglesForm.append(input)
+            }
         }
-        
-        if (area) {
-            areaText.textContent = area
-        }
-    
-        if (parameters) {
-    
-        }
+
+
+        rectanglesForm.style.gridTemplateColumns = `repeat(${rowsData[0].length + 2}, 1fr)`
+        rectanglesForm.style.gridTemplateRows = `repeat(${rowsData.length + 2}, 1fr)`
+        rectanglesForm.style.width = `${rowsData[0].length*50}px`
+
+        setInitialData()
     }
    
 }
-getDataFromLocalStorage(rectanglesForm, perimeterText, areaText)
-
+getDataFromLocalStorage(rectanglesForm)
 
 
 fieldSizeForm.addEventListener('input', (e) => {
     if (e.target.type === 'range') {
-        let numberElement = e.target.parentElement.parentElement.querySelector('input[type=number]')
+        const numberElement = e.target.parentElement.parentElement.querySelector('input[type=number]')
 
         numberElement.value = e.target.value
     } else {
-        let rangeElement = e.target.parentElement.parentElement.querySelector('input[type=range]')
+        const rangeElement = e.target.parentElement.parentElement.querySelector('input[type=range]')
 
         rangeElement.value = e.target.value
     }
@@ -60,360 +66,602 @@ fieldSizeForm.addEventListener('submit', (e) => {
     e.preventDefault()
     rectanglesForm.innerHTML =''
 
-    let columns = e.target['columns-field'].value
-    let rows = e.target['rows-field'].value
+    let columns = Number(e.target['columns-field'].value)
+    let rows = Number(e.target['rows-field'].value)
+
     localStorage.setItem('parameters', JSON.stringify({columns, rows}))
     let fieldsAmount = columns * rows
 
+
     for (let i = 0; i < fieldsAmount; i++) {
-        const columnNum = (i % columns) + 1
-        const rowNum = Math.floor((i / columns) + 1) 
-        const field = document.createElement('input')
-        field.setAttribute('type', 'checkbox')
-        field.dataset.row = rowNum
-        field.dataset.column = columnNum
-        rectanglesForm.append(field)
+        const columnNum = (i % columns) + 2
+        const rowNum = Math.floor((i / columns) + 2)
+        const input = document.createElement('input')
+        input.setAttribute('type', 'checkbox')
+        input.dataset.row = rowNum
+        input.dataset.column = columnNum
+        rectanglesForm.append(input)
+        input.style.gridColumn = columnNum
+        input.style.gridRow = rowNum
     }
 
-    rectanglesForm.style.gridTemplateColumns = `repeat(${columns}, 1fr)`
-    rectanglesForm.style.gridTemplateRows = `repeat(${rows}, 1fr)`
+    rectanglesForm.style.gridTemplateColumns = `repeat(${columns + 2}, 1fr)`
+    rectanglesForm.style.gridTemplateRows = `repeat(${rows + 2}, 1fr)`
     rectanglesForm.style.width = `${columns*50}px`
 
 
-    localStorage.setItem('rectangles-form-style', JSON.stringify({columns: rectanglesForm.style.gridTemplateColumns, rows: rectanglesForm.style.gridTemplateRows, width: rectanglesForm.style.width}))
-    localStorage.setItem('rectangles-form', JSON.stringify(rectanglesForm.innerHTML))
+    // localStorage.setItem('rectangles-form-style', JSON.stringify({columns: rectanglesForm.style.gridTemplateColumns, rows: rectanglesForm.style.gridTemplateRows, width: rectanglesForm.style.width}))
+    // localStorage.setItem('rectangles-form', JSON.stringify(rectanglesForm.innerHTML))
+    setRows()
+
     perimeterText.textContent  = 0
     areaText.textContent  = 0
 })
 
 
 rectanglesForm.addEventListener('input', (e) => {
-    let columnsAmount = Number(fieldSizeForm.querySelector('#columns-field').value)
-    let fields = [...rectanglesForm.children]
-    let rowsEl = []
+    const columnsAmount = Number(fieldSizeForm.querySelector('#columns-field').value)
+    const inputs = [...rectanglesForm.querySelectorAll('input[type=checkbox]')]
 
-    console.log(JSON.parse(localStorage.getItem('rectangles-form')));
+    const rowsEl = []
 
-    for (let i = 0; i < fields.length; i+=columnsAmount) {
-        // perdaryt kaip rowsEl tik koordinates
-        let row = fields.slice(i, i + columnsAmount)
+    for (let i = 0; i < inputs.length; i+=columnsAmount) {
+        const row = inputs.slice(i, i + columnsAmount)
         rowsEl.push(row)
     }
 
-    let field = e.target
+    const field = e.target
+    changeGroup(field)
 
-    const inputsEl = [...document.querySelectorAll('[data-group]')]
-    const groupsEl = Object.values(Object.groupBy(inputsEl, inputEl => inputEl.dataset.group))
-
-    const groupsData = []
-
-    for (let i = 0; i < groupsEl.length; i++) {
-        const groupEl = groupsEl[i];
-
-        const groupData = {
-            group: groupEl[0].dataset.group,
-            fields: []
-        }
-
-        for (let j = 0; j < groupEl.length; j++) {
-            const input = groupEl[j];
-
-            const field = {x: input.dataset.column, y: input.dataset.row}
-            groupData.fields.push(field)
-        }
-        groupsData.push(groupData)
-    }
-
-    changeGroup(field, groupsData)
-    localStorage.setItem('groups', JSON.stringify(groupsData))
-    
-
-    getPerimeter(rowsEl)
-    getArea(fields)
-
-    localStorage.setItem('rectangles-form', JSON.stringify(rectanglesForm.innerHTML))
+    setInitialData()
 })
 
+function setInitialData() {
+    setMeasurments()
+    setInputsGroups()
 
-resetBtn.addEventListener('click', (e) => {
-    let fields = [...rectanglesForm.children]
-    for (let i = 0; i < fields.length; i++) {
-        const field = fields[i];
-        field.checked = false
-        field.style.border = 'none'
-        delete field.dataset.group
-    }
-})
-
-
-function getNeighbors(field) {
-    const currentColumn = Number(field.dataset.column)
-    const currentRow = Number(field.dataset.row)
-
-    const topEl = document.querySelector(`[data-row="${currentRow-1}"][data-column="${currentColumn}"]`)
-    const bottomEl = document.querySelector(`[data-row="${currentRow+1}"][data-column="${currentColumn}"]`)
-    const leftEl = document.querySelector(`[data-row="${currentRow}"][data-column="${currentColumn-1}"]`)
-    const rightEl = document.querySelector(`[data-row="${currentRow}"][data-column="${currentColumn+1}"]`)
-
-    return {topEl, bottomEl, leftEl, rightEl}
+    getParameters()
+    getGroupsParameters()
 }
 
-function getCheckedNeighbors(field) {
-    const {topEl, bottomEl, leftEl, rightEl} = getNeighbors(field)
-    const neighbors = []
-   
-    if (topEl?.checked) {
-        neighbors.push(topEl)
+
+function setRows() {
+    const columnsAmount = Number(fieldSizeForm.querySelector('#columns-field').value)
+    const inputs = [...rectanglesForm.querySelectorAll('input[type=checkbox]')]
+
+    const fields = []
+    const rows = []
+
+    for (let i = 0; i < inputs.length; i++) {
+        const field = 0
+        fields.push(field)
     }
-    if (bottomEl?.checked) {
-        neighbors.push(bottomEl)
+
+    for (let i = 0; i < inputs.length; i+=columnsAmount) {
+        const row = fields.slice(i, i + columnsAmount)
+        rows.push(row)
     }
-    if (leftEl?.checked) {
-        neighbors.push(leftEl)
-    }
-    if (rightEl?.checked) {
-        neighbors.push(rightEl)
-    }
-    
-    return neighbors
+
+    localStorage.setItem('rows', JSON.stringify(rows))
 }
 
-function areFieldsConnected(field1, field2) {
-    return (
-        (Math.abs(field1.x - field2.x) === 1 && field1.y === field2.y) ||
-        (Math.abs(field1.y - field2.y) === 1 && field1.x === field2.x)
-    );
+function setInputsGroups() {
+    const rows = JSON.parse(localStorage.getItem('rows'))
+    const inputs = [...rectanglesForm.querySelectorAll('input[type=checkbox]')]
+
+    for (let i = 0; i < inputs.length; i++) {
+        const input = inputs[i];
+
+        const fieldRowIndex = Number(input.dataset.row) - 2
+        const fieldColIndex = Number(input.dataset.column) - 2        
+        const groupId = rows[fieldRowIndex][fieldColIndex]
+
+        if (groupId !== 0) {
+            input.dataset.group = groupId
+        } else {
+            delete input.dataset.group
+        }
+    }
+
+    setInputsBorders()
 }
 
-function findCommonFields(field, group, checkedFields) {
-    const fieldNeighbors = getCheckedNeighbors(field)
-    checkedFields.push(field)
-    group.push(field)
+
+
+function find(group, checkedFields, rows, fieldRowIndex, fieldColIndex) {
+    const fieldNeighbors = getNeighborFields(rows, fieldRowIndex, fieldColIndex).checked
+
+    checkedFields.push({row: fieldRowIndex, col: fieldColIndex})
+    group.push({row: fieldRowIndex, col: fieldColIndex})
 
     fieldNeighbors.forEach(neighbor => {
-        if (!checkedFields.includes(neighbor)) {
-            findCommonFields(neighbor, group, checkedFields)
+        if (!checkedFields.some(field => field.row === neighbor.row && field.col === neighbor.col)) {
+            find(group, checkedFields, rows, neighbor.row, neighbor.col)
         }
     })
 }
 
+function getNeighborFields(rows, fieldRowIndex, fieldColIndex) {
+    const topField = rows[fieldRowIndex - 1] && rows[fieldRowIndex - 1][fieldColIndex]
+    const bottomField = rows[fieldRowIndex + 1] && rows[fieldRowIndex + 1][fieldColIndex]
+    const leftField = rows[fieldRowIndex] && rows[fieldRowIndex][fieldColIndex - 1]
+    const rightField = rows[fieldRowIndex] && rows[fieldRowIndex][fieldColIndex + 1]
 
-function changeGroup(field, groupsData) {
-    if (field.checked) {
-        if (groupsData.length === 0) {
-            field.dataset.group = 1
+    const checked = []
+
+    if (topField > 0) {
+        checked.push({row: fieldRowIndex - 1, col: fieldColIndex})
+    }
+
+    if (bottomField > 0) {
+        checked.push({row: fieldRowIndex + 1, col: fieldColIndex})
+    }
+
+    if (leftField > 0) {
+        checked.push({row: fieldRowIndex, col: fieldColIndex - 1})
+    }
+    if (rightField > 0) {
+        checked.push({row: fieldRowIndex, col: fieldColIndex + 1})
+    }
+
+
+    return {
+        fields: {topField, bottomField, leftField, rightField},
+        checked
+    }
+}
+
+
+function changeGroup(input) {
+    let rows = JSON.parse(localStorage.getItem('rows'))
+    const allGroupIds = [... new Set(rows.flat().filter(groupId => groupId > 0))]
+
+    const fieldRowIndex = Number(input.dataset.row) - 2
+    const fieldColIndex = Number(input.dataset.column) - 2
+
+
+    if (input.checked) {
+        let newGroup
+
+        if (allGroupIds.length === 0) {
+            newGroup = 1
         } else {
-            setFieldGroup(field, groupsData)
+            const possibleGroups = []
+    
+            const neighbors = getNeighborFields(rows, fieldRowIndex, fieldColIndex).fields
+
+            if (neighbors?.topField > 0) {
+                possibleGroups.push(neighbors.topField)
+            }
+            if (neighbors?.bottomField > 0) {
+                possibleGroups.push(neighbors.bottomField)
+            }
+            if (neighbors?.leftField > 0) {
+                possibleGroups.push(neighbors.leftField)
+            }
+            if (neighbors?.rightField > 0) {
+                possibleGroups.push(neighbors.rightField)
+            }
+     
+            if (possibleGroups.length > 0) {
+                const groupsIds = rows.flat(1).filter(group => possibleGroups.some(id => id === group))
+
+                const groupsArrays = Object.values(Object.groupBy(groupsIds, value => value))
+                const groupId =  groupsArrays.reduce((acc, value) => acc.length > value.length ? acc : value)[0]
+
+                for (let i = 0; i < rows.length; i++) {
+                    let row = rows[i];
+
+                    for (let j = 0; j < row.length; j++) {
+                        if (groupsIds.includes(row[j])) {
+                            row.splice(j, 1, groupId)
+                        }
+                    }
+                }
+
+                newGroup = groupId
+            } else {
+                const skippedGroupsIds = getSkippedGroupsIds(allGroupIds)
+
+                if (skippedGroupsIds > 0) {
+                    newGroup = Math.min(...skippedGroupsIds)
+                } else {
+                    newGroup = Math.max(...allGroupIds) + 1
+                } 
+            }
         }
+        rows[fieldRowIndex].splice(fieldColIndex, 1, newGroup)
+
     } else {
-        const currentGroupData = groupsData.filter(groupData => groupData.group === field.dataset.group)[0]
-
-        const currentFields = currentGroupData.fields.filter(otherField => {
-            return otherField.x !== field.dataset.column || otherField.y !== field.dataset.row
-        })
-
-        currentGroupData.fields = currentFields
-        delete field.dataset.group
-
-        const groupElements = [...document.querySelectorAll(`[data-group="${currentGroupData.group}"]`)]
-        const groupIndex = groupsData.indexOf(currentGroupData)
-        groupsData[groupIndex].fields = currentFields
-
-        const allGroupIds = groupsData.map(groupData => groupData.group)
+        rows[fieldRowIndex].splice(fieldColIndex, 1, 0)
 
         const groups = []
         const checkedFields = []
-        groupElements.forEach(input => {
-            if (!checkedFields.includes(input)) {
-                const group = []
-                findCommonFields(input, group, checkedFields)
-                groups.push(group)
-            }
-        })
-        
-        if (groups.length > 1) {
-            groups.forEach(group => {
-                const skippedGroupsIds = getSkippedGroupsIds(allGroupIds)
-                let groupId
-                console.log(skippedGroupsIds);
-    
-                if (skippedGroupsIds.length > 0) {
-                    groupId = Math.min(...skippedGroupsIds)
-                } else {
-                    groupId = Math.max(...allGroupIds) + 1
-                }
-                group.forEach(field => {
-                    field.dataset.group = groupId
-                    console.log(field.dataset.group);
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+
+            if (i === fieldRowIndex || i === fieldRowIndex - 1 || i === fieldRowIndex + 1) {
+                for (let j = 0; j < row.length; j++) {
+                    const field = row[j];
                     
-                    allGroupIds.push(field.dataset.group)
-                })
-            })
-        }
-        console.log(groups);
+                    if (j === fieldColIndex || j === fieldColIndex - 1 || j === fieldColIndex + 1) {
 
-    }
-}
-
-
-function setFieldGroup(field, groupsData) {
-    const currentCoordinates = {x: field.dataset.column, y: field.dataset.row}
-
-    const possibleGroupsId = []
-
-    for (let i = 0; i < groupsData.length; i++) {
-        const groupData = groupsData[i];
-
-        for (let j = 0; j < groupData.fields.length; j++) {
-            const otherField =  groupData.fields[j];
-            const groupId = groupData.group
-
-            const areConnected = areFieldsConnected(currentCoordinates, otherField)
-            
-            if (areConnected) {
-                possibleGroupsId.push(groupId)
-            } else {
-                const allGroupIds = groupsData.map(groupData => groupData.group)
-                const skippedGroupsIds = getSkippedGroupsIds(allGroupIds)
-                
-                if (skippedGroupsIds.length > 0) {
-                    field.dataset.group = Math.min(...skippedGroupsIds)
-                } else {
-                    field.dataset.group = Math.max(...allGroupIds) + 1
+                        if (!checkedFields.some(field => field.row === i && field.col === j) && field > 0) {
+                            const group = []
+                            find(group, checkedFields, rows, i, j)
+                            groups.push(group)
+                        }
+                    }
                 }
             }
-        }   
-    }
-
-    if (possibleGroupsId.length > 0) {
-        const possibleGroups = []
-        for (let i = 0; i < possibleGroupsId.length; i++) {
-            const possibleGroupId = possibleGroupsId[i];
-            possibleGroups.push(groupsData.filter(groupData => groupData.group === possibleGroupId)[0])
         }
 
-        for (let i = 0; i < possibleGroups.length; i++) {
-            const possibleGroupsIdsEqual = possibleGroups.every(group => group.fields.length === possibleGroups[0].fields.length)
-
-            const possibleGroupElements = (document.querySelectorAll(`[data-group="${possibleGroupsId[i]}"]`))
-            
-            const biggestGroupId = possibleGroupsIdsEqual ? possibleGroups[0].group : possibleGroups.reduce((acc, value) => acc.fields.length > value.fields.length ? acc : value).group
-
-            possibleGroupElements.forEach(input => input.dataset.group = biggestGroupId)
-            field.dataset.group = biggestGroupId
-        }
+        groups.forEach(group => {
+            const skippedGroupsIds = getSkippedGroupsIds(allGroupIds)
+            let groupId
+    
+            if (skippedGroupsIds.length > 0) {
+                groupId = Math.min(...skippedGroupsIds)
+            } else {
+                groupId = Math.max(...allGroupIds) + 1
+            }
+            group.forEach(field => {
+                rows[field.row].splice(field.col, 1, groupId)
+            })
+            allGroupIds.push(groupId)
+        })
     }
+
+    localStorage.setItem('rows', JSON.stringify(rows))
 }
 
 function getSkippedGroupsIds(allGroupIds) {
-    console.log(allGroupIds);
     const skippedGroupsIds = []
     for(let i = 1; i <= allGroupIds.length; i++) { 
-        if (allGroupIds.indexOf(`${i}`) === -1) {
-            skippedGroupsIds.push(`${i}`)
+        if (allGroupIds.indexOf(i) === -1) {
+            skippedGroupsIds.push(i)
         }
     } 
 
     return skippedGroupsIds
 }
 
+function setInputsBorders() {
+    const rows = JSON.parse(localStorage.getItem('rows'))
 
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
 
+        for (let j = 0; j < row.length; j++) {
+            const field = row[j];
+            
+            const {topField, bottomField, leftField, rightField} = getNeighborFields(rows, i, j).fields
+            
+            if (field > 0) {
+                const currentInput = document.querySelector(`[data-row="${i+2}"][data-column="${j+2}"]`)
+                currentInput.className = ''
+                
+                if (topField > 0) {
+                    currentInput.classList.add('top')
+                }
+                if (bottomField > 0) {
+                    currentInput.classList.add('bottom')
+                }
+                if (leftField > 0) {
+                    currentInput.classList.add('left')
+                }
+                if (rightField > 0) {
+                    currentInput.classList.add('right')
+                }
+            }
+        }
+    }
+}
 
-// function setMeasurments() {
-//     const inputsInGroups = document.querySelectorAll('[data-group]')
-//     let allGroupsNums = []
-//     let groups = []
-//     let nums = []
+function setMeasurments() {
+    const oldMeasurments = document.querySelectorAll('.measurment');
 
-//     for (let i = 0; i < inputsInGroups.length; i++) {
-//         const input = inputsInGroups[i];
-//         nums.push(input.dataset.group)
+    oldMeasurments.forEach(oldMeasurment => {
+        oldMeasurment.remove();
+    });
 
-//         allGroupsNums = ([...new Set(nums)]).sort()
-//     }
+    const rows = JSON.parse(localStorage.getItem('rows'));
+    const columns = rows[0].map((_, index) => rows.map(row => row[index]));
+    
 
-//     let grid = []
-//     for (let i = 0; i < allGroupsNums.length; i++) {
-//         const groupNum = allGroupsNums[i];
+    createMeasurmentText(rows, 'row')
+    createMeasurmentText(columns, 'column')
+}
+
+function createMeasurmentText(rows, className) {
+    const createdParameters = []
+
+    let group = null
+    let startColIndex = null
+    let rowIndex = null
+    let colSpan = 0
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+
+        for (let j = 0; j < row.length; j++) {
+            const field = row[j];
+            const {topField} = getNeighborFields(rows, i, j).fields
+
+            if (field > 0) {
+                if ((topField === 0 || !topField)) {
+                    if (!startColIndex && !rowIndex && !group) {
+                        group = field
+                        startColIndex = j
+                        rowIndex = i
+                    }
+                    colSpan++
+                } else {
+                    if (colSpan > 0) {
+                        if (!createdParameters.some(item => item[0] === group && item[1] === colSpan && item[2] === startColIndex)) {
+                            createSpanElement(colSpan, rowIndex, startColIndex, '', className);
+                            createdParameters.push([group, colSpan, startColIndex])
+                        }
+
+                        group = null
+                        startColIndex = null
+                        rowIndex = null
+                        colSpan = 0
+                    }
+                }
+
+            } 
+            if (colSpan > 0 && (field === 0 || j === row.length -1)) {
+                if (!createdParameters.some(item => item[0] === group && item[1] === colSpan && item[2] === startColIndex)) {
+                    createSpanElement(colSpan, rowIndex, startColIndex, '', className);
+                    createdParameters.push([group, colSpan, startColIndex])
+                }
+                
+                group = null
+                startColIndex = null
+                rowIndex = null
+                colSpan = 0
+            }
+        }
+    }
+
+    let group2 = null
+    let startColIndex2 = null
+    let rowIndex2 = null
+    let colSpan2 = 0
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+
+        for (let j = 0; j < row.length; j++) {
+            const field = row[j];
+            const {bottomField} = getNeighborFields(rows, i, j).fields
+     
+            if (field > 0) {
+                if (bottomField === 0 || !bottomField) {
+                    if (!startColIndex2 && !rowIndex2 && !group2) {
+                        group2 = field
+                        startColIndex2 = j
+                        rowIndex2 = i
+                    }
+    
+                    colSpan2++
+                } else if (colSpan2 > 0) {
+                    if (!createdParameters.some(item => item[0] === group2 && item[1] === colSpan2 && item[2] === startColIndex2)) {
+                        createSpanElement(colSpan2, rowIndex2, startColIndex2, 'bottom', className)
+                        createdParameters.push([group2, colSpan2, startColIndex2])
+                    }
+
+                    group2 = null
+                    startColIndex2 = null
+                    rowIndex2 = null
+                    colSpan2 = 0
+                }
+            }
+            if (colSpan2 > 0 && (field === 0 || j === row.length -1)) {
+                if (!createdParameters.some(item => item[0] === group2 && item[1] === colSpan2 && item[2] === startColIndex2)) {
+                    createSpanElement(colSpan2, rowIndex2, startColIndex2, 'bottom', className);
+                    createdParameters.push([group2, colSpan2, startColIndex2])
+                }
+
+                group2 = null
+                startColIndex2 = null
+                rowIndex2 = null
+                colSpan2 = 0
+            }
+        }
+
+    }
+
+    function createSpanElement(spanWidth, rowIndex, startColumnIndex, position, className) {
+        const gridRow = rowIndex + 2
+        const gridColumn = startColumnIndex + 2
+
+        const text = document.createElement('span')
+        text.className = 'measurment'
+        text.textContent = spanWidth * 100
+        text.classList.add(className)
         
-//         const group = [...document.querySelectorAll(`[data-group="${groupNum}"]`)]
-//         grid.push({rows: [], columns: []})
-          
-//         for (let j = 0; j < group.length; j++) {
-//             const input = group[j];
-//             grid[i].rows.push(Number(input.dataset.row))
-//             grid[i].columns.push(Number(input.dataset.column))
-//         }
-//     }
-// }
+        if (className === 'column') {
+            text.style.gridRowStart = gridColumn
+            text.style.gridRowEnd = gridColumn + spanWidth;
+
+            if (position === 'bottom') {
+                text.classList.add('bottom')
+                text.style.gridColumn = gridRow + 1
+                
+            } else {
+                text.style.gridColumn = gridRow - 1
+                text.classList.add('top')
+
+            }
+        } else {
+            text.style.gridColumnStart = gridColumn
+            text.style.gridColumnEnd = gridColumn + spanWidth;
+
+            if (position === 'bottom') {
+                text.classList.add('bottom')
+                text.style.gridRow = gridRow + 1
+
+            } else {
+                text.classList.add('top')
+                text.style.gridRow = gridRow - 1
+
+            }
+        }
+
+        rectanglesForm.append(text);
+    }
+
+} 
 
 
+function getParameters() {
+    const rows = JSON.parse(localStorage.getItem('rows'))
 
-function getPerimeter(rows) {
+    let width = 100
+    let height = 100
+    let fieldArea = width*height 
+    let area = 0
+
     let perimeter = 0
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
-        let topFields = []
-        let bottomFields = []
 
-        if (i > 0) {
-            topFields = rows[i-1]
-        }
-        if (i < rows.length - 1) {
-            bottomFields = rows[i+1]
-        }
-        
         for (let j = 0; j < row.length; j++) {
             const currentField = row[j]
-            const leftField = row[j - 1] 
-            const rightField = row[j + 1]
+            const {topField, bottomField, leftField, rightField} = getNeighborFields(rows, i, j).fields
 
-            if (currentField.checked) {
+            if (currentField > 0) {
                 let fieldPerimeter = 400
-                // su klasem ir classList.remove()
-                currentField.className = ''
+                area += fieldArea
                 
-                if (topFields[j] && topFields[j].checked) {
+                if (topField > 0) {
                     fieldPerimeter -= 100
-                    currentField.classList.add('top')
                 }
-                if (bottomFields[j] && bottomFields[j].checked) {
+          
+                if (bottomField > 0) {
                     fieldPerimeter -= 100
-                    currentField.classList.add('bottom')
                 }
                 
-                if (leftField && leftField.checked) {
+                if (leftField > 0) {
                     fieldPerimeter -= 100
-                    currentField.classList.add('left')
                 }
-                if (rightField && rightField.checked) {
+                if (rightField > 0) {
                     fieldPerimeter -= 100
-                    currentField.classList.add('right')
                 }
 
                 perimeter += fieldPerimeter
             }
 
+            areaText.textContent = area
             perimeterText.textContent = perimeter
-            localStorage.setItem('perimeter', perimeter)
         }
     }
 }
 
-function getArea(fields) {
-    let width = 100
-    let height = 100
-    let area = 0
-    
-    for (let i = 0; i < fields.length; i++) {
-        let field = fields[i]
-        if (field.checked) {
-            let fieldArea = width*height 
-            area += fieldArea
+function getGroupsParameters() {
+    const oldData = document.querySelectorAll('.group-parameters')
+    oldData.forEach(old => {
+        old.remove()
+    })
+
+    const groupsData = JSON.parse(localStorage.getItem('groups-data'))
+    const rows = JSON.parse(localStorage.getItem('rows'))
+
+    const groupsParameters = document.getElementById('groups-parameters')
+
+
+    for (let i = 0; i < groupsData.length; i++) {
+        const group = groupsData[i];
+        let groupPerimeter = 0
+        let groupArea = 0
+
+        for (let j = 0; j < group.fields.length; j++) {
+            const currentField = group.fields[j];
+            const fieldRow = currentField.row
+            const fieldCol = currentField.col
+
+            const {topField, bottomField, leftField, rightField} = getNeighborFields(rows, fieldRow - 2, fieldCol - 2).fields
+            let fieldPerimeter = 400
+                
+            if (topField > 0) {
+                fieldPerimeter -= 100
+            }
+      
+            if (bottomField > 0) {
+                fieldPerimeter -= 100
+            }
+            
+            if (leftField > 0) {
+                fieldPerimeter -= 100
+            }
+            if (rightField > 0) {
+                fieldPerimeter -= 100
+            }
+
+            groupArea+=10000
+            groupPerimeter += fieldPerimeter
         }
+
+
+        
+        const groupParameters = document.createElement('div')
+        groupParameters.className = 'group-parameters'
+    
+        const parametersText = document.createElement('div')
+        parametersText.classList.add('parameters-text')
+
+        const perimeterEl = document.createElement('p')
+        perimeterEl.textContent = 'Perimeter: '
+        const perimeterText = document.createElement('span')
+        perimeterText.textContent = groupPerimeter
+        perimeterEl.append(perimeterText)
+    
+        const areaEl = document.createElement('p')
+        areaEl.textContent = 'Area: '
+        const areaText = document.createElement('span')
+        areaText.textContent = groupArea
+        areaEl.append(areaText)
+    
+        const groupGrid = document.createElement('div')
+        groupGrid.className = 'group-grid'
+        
+
+        const maxRow = group.fields.reduce((max, field) => field.row > max.row ? field : max).row
+        const maxCol = group.fields.reduce((max, field) => field.col > max.col ? field : max).col
+
+        const minRow = group.fields.reduce((min, field) => field.row < min.row ? field : min).row
+        const minCol = group.fields.reduce((min, field) => field.col < min.col ? field : min).col
+
+        const rowsLength = maxRow - minRow + 1
+        const colsLength = maxCol - minCol + 1
+
+        groupGrid.style.gridTemplateRows = `repeat(${rowsLength}, 15px)`
+        groupGrid.style.gridTemplateColumns = `repeat(${colsLength}, 15px)`
+
+        for (let i = 0; i < rowsLength; i++) {
+            for (let j = 0; j < colsLength; j++) {
+                const element = document.createElement('element')
+                element.setAttribute('type', 'checkbox')
+                element.setAttribute('disabled', true)
+                
+                
+                group.fields.forEach(field => {
+                    if (field.row - minRow === i && field.col - minCol === j) {
+                        element.setAttribute('checked', true)
+                        element.style.backgroundColor = group.color
+                    }
+                })
+ 
+                groupGrid.append(element)
+            }
+        }
+    
+        parametersText.append(perimeterEl, areaEl)
+        groupParameters.append(parametersText, groupGrid)
+        groupsParameters.append(groupParameters)
     }
-    areaText.textContent = area
-    localStorage.setItem('area', area)
 }

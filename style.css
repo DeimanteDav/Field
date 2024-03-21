@@ -1,109 +1,193 @@
-/* sustilizuoti checkboxa */
-#custom-size-form #custom-field-btn {
+.container {
+  max-width: 1100px;
+  margin: 20px auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.container #custom-size-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 30px;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+.container #custom-size-form .form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.container #custom-size-form .form-group .form-control label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.container #custom-size-form .form-group .form-control input {
+  padding: 3px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.container #custom-size-form #custom-field-btn {
   cursor: pointer;
   border: 1px solid #babfc3;
   padding: 5px 15px;
   background: #ffffff;
   border-radius: 4px;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 0px 0px;
+  transition: background-color 0.3s;
 }
-#custom-size-form #custom-field-btn:hover {
+.container #custom-size-form #custom-field-btn:hover {
   background: #f6f6f7;
 }
-
-.measurment {
-  position: absolute;
-}
-
-#rectangles-form {
+.container #rectangles-form {
   width: auto;
   display: grid;
   gap: 1px;
 }
-#rectangles-form input[type=checkbox] {
+.container #rectangles-form .measurment {
+  pointer-events: none;
+  font-size: 13px;
+}
+.container #rectangles-form .measurment.row {
+  justify-self: center;
+}
+.container #rectangles-form .measurment.row.top {
+  align-self: end;
+}
+.container #rectangles-form .measurment.row.bottom {
+  align-self: start;
+}
+.container #rectangles-form .measurment.column {
+  align-self: center;
+}
+.container #rectangles-form .measurment.column.top {
+  justify-self: end;
+  transform: rotate(-90deg);
+}
+.container #rectangles-form .measurment.column.bottom {
+  justify-self: start;
+  transform: rotate(90deg);
+}
+.container #rectangles-form input[type=checkbox] {
   display: inline-block;
   margin: 0px;
   height: 50px;
   width: 50px;
-  position: relative;
   cursor: pointer;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
   background-color: #EEF0E5;
 }
-#rectangles-form input[type=checkbox][data-group="1"] {
+.container #rectangles-form input[type=checkbox][data-group="1"] {
   background-color: hsl(15, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="2"] {
+.container #rectangles-form input[type=checkbox][data-group="2"] {
   background-color: hsl(30, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="3"] {
+.container #rectangles-form input[type=checkbox][data-group="3"] {
   background-color: hsl(45, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="4"] {
+.container #rectangles-form input[type=checkbox][data-group="4"] {
   background-color: hsl(60, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="5"] {
+.container #rectangles-form input[type=checkbox][data-group="5"] {
   background-color: hsl(75, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="6"] {
+.container #rectangles-form input[type=checkbox][data-group="6"] {
   background-color: hsl(90, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="7"] {
+.container #rectangles-form input[type=checkbox][data-group="7"] {
   background-color: hsl(105, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="8"] {
+.container #rectangles-form input[type=checkbox][data-group="8"] {
   background-color: hsl(120, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="9"] {
+.container #rectangles-form input[type=checkbox][data-group="9"] {
   background-color: hsl(135, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="10"] {
+.container #rectangles-form input[type=checkbox][data-group="10"] {
   background-color: hsl(150, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="11"] {
+.container #rectangles-form input[type=checkbox][data-group="11"] {
   background-color: hsl(165, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="12"] {
+.container #rectangles-form input[type=checkbox][data-group="12"] {
   background-color: hsl(180, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="13"] {
+.container #rectangles-form input[type=checkbox][data-group="13"] {
   background-color: hsl(195, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="14"] {
+.container #rectangles-form input[type=checkbox][data-group="14"] {
   background-color: hsl(210, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="15"] {
+.container #rectangles-form input[type=checkbox][data-group="15"] {
   background-color: hsl(225, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="16"] {
+.container #rectangles-form input[type=checkbox][data-group="16"] {
   background-color: hsl(240, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="17"] {
+.container #rectangles-form input[type=checkbox][data-group="17"] {
   background-color: hsl(255, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="18"] {
+.container #rectangles-form input[type=checkbox][data-group="18"] {
   background-color: hsl(270, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="19"] {
+.container #rectangles-form input[type=checkbox][data-group="19"] {
   background-color: hsl(285, 100%, 60%);
 }
-#rectangles-form input[type=checkbox][data-group="20"] {
+.container #rectangles-form input[type=checkbox][data-group="20"] {
   background-color: hsl(300, 100%, 60%);
 }
-#rectangles-form input[type=checkbox]:checked {
+.container #rectangles-form input[type=checkbox]:checked {
   border: 1px solid black;
 }
-#rectangles-form input[type=checkbox]:checked.top {
+.container #rectangles-form input[type=checkbox]:checked.top {
   border-top: none;
 }
-#rectangles-form input[type=checkbox]:checked.bottom {
+.container #rectangles-form input[type=checkbox]:checked.bottom {
   border-bottom: none;
 }
-#rectangles-form input[type=checkbox]:checked.right {
+.container #rectangles-form input[type=checkbox]:checked.right {
   border-right: none;
 }
-#rectangles-form input[type=checkbox]:checked.left {
+.container #rectangles-form input[type=checkbox]:checked.left {
   border-left: none;
+}
+.container #parameters {
+  margin: 20px 0;
+}
+.container .parameters-text p {
+  font-weight: bold;
+  margin: 10px 0;
+}
+.container .parameters-text p span {
+  font-weight: 500;
+  color: #424242;
+}
+.container #groups-parameters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.container #groups-parameters .group-parameters {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+}
+.container #groups-parameters .group-parameters .group-grid {
+  display: grid;
+  gap: 1px;
+}
+.container #groups-parameters .group-parameters .group-grid input[type=checkbox] {
+  display: inline-block;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  margin: 0;
 }/*# sourceMappingURL=style.css.map */

@@ -8,38 +8,41 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="container">
+    <div class="container">
         <form id="custom-size-form">
             <div class="form-group">
                 <div class="form-control">
                     <label for="columns-field">Number of Columns</label>
-                    <input min="1" max="15" type="number" name="columns-field" id="columns-field" value="4">
+                    <input min="1" max="15" type="number" name="columns" id="columns-field">
                 </div>
                 <div class="form-control">
                     <label for="columns-range" hidden>Number of Columns</label>
-                    <input min="1" max="15" type="range" name="columns-range" id="columns-range" value="4">
+                    <input min="1" max="15" type="range" name="columns" id="columns-range">
                 </div>
             </div>
             <div class="form-group">
                 <div class="form-control">
                     <label for="rows-field">Number of Rows</label>
-                    <input min="1" max="15" type="number" name="rows-field" id="rows-field"value="3">
+                    <input min="1" max="15" type="number" name="rows" id="rows-field">
                 </div>
                 <div class="form-control">
                     <label for="rows-range" hidden>Number of Rows</label>
-                    <input min="1" max="15" type="range" name="rows-range" id="rows-range" value="3">
+                    <input min="1" max="15" type="range" name="rows" id="rows-range">
                 </div>
             </div>
             <button id="custom-field-btn" type="submit">Save</button>
         </form>
 
-        <p>Perimeter:</p>
-        <p id="perimeter"></p>
-
-        <p>Area:</p>
-        <p id="area"></p>
         <form id="rectangles-form"></form>
-        <button id="reset-btn">Reset</button>
+        <div class="parameters-text" id="parameters">
+            <p>Perimeter: <span id="perimeter"></span></p>
+            <p>Area: <span id="area"></span></p>
+        </div>
+        <div id="groups-parameters">
+   
+  
+
+        </div>
     </div>
 
     <script src="script.js"></script>
