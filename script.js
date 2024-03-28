@@ -341,8 +341,10 @@ function changeGroup(input) {
                 }
             }
         }
-
-        const longestGroup = groups.reduce((result, group) => result.length > group.length ? result : group)
+        
+        const longestGroup = groups.reduce((result, group) => {
+            return result.length > group.length ? result : group
+        }, [])
 
         groups.forEach(group => {
             const skippedGroupsIds = getSkippedGroupsIds(allGroupIds)
@@ -354,6 +356,7 @@ function changeGroup(input) {
                 groupId = Math.max(...allGroupIds) + 1
             }
 
+            console.log(longestGroup, group);
             if (longestGroup !== group) {
                 group.forEach(field => {
                     rows[field.row].splice(field.col, 1, groupId)
