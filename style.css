@@ -48,7 +48,15 @@
 }
 .container #rectangles-form .measurment {
   pointer-events: none;
-  font-size: 13px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.container #rectangles-form .measurment p {
+  margin: 0;
+  padding: 3px 0;
 }
 .container #rectangles-form .measurment.row {
   justify-self: center;
@@ -184,7 +192,7 @@
   display: grid;
   gap: 1px;
 }
-.container #groups-parameters .group-parameters .group-grid input[type=checkbox] {
+.container #groups-parameters .group-parameters .group-grid span {
   display: inline-block;
   -webkit-appearance: none;
      -moz-appearance: none;

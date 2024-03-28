@@ -3,6 +3,32 @@ let rectanglesForm = document.getElementById('rectangles-form')
 let perimeterText = document.getElementById('perimeter');
 let areaText = document.getElementById('area')
 
+const fieldSize = 50
+
+
+
+/*
+    vanilla javascript project
+
+    scss naudojamas. ciklai funkcija 
+
+    Perimetro ir ploto skaiciuokle pagal sukurta grida.
+    bendras plotas ir kiekvienos figuros atskirai.
+    input checkboxes naudojami.
+    css grid,
+    elementai susijungia kai atsitoja vienas kito. spalvos susijungia.
+    figuru mirroring
+    local storage naudojamas 
+*/
+
+
+// ant grupiu uzdet PLOTA IR PERIMETRA per viduri
+// atcheckinus kad nepasikeistu spalva ilgiausio elemento
+
+
+// 
+
+
 function getDataFromLocalStorage(rectanglesForm) {
     const parameters = JSON.parse(localStorage.getItem('parameters'))
     const rowsData = JSON.parse(localStorage.getItem('rows'))
@@ -33,15 +59,15 @@ function getDataFromLocalStorage(rectanglesForm) {
 
                 if (field > 0) {
                     input.checked = true
+                    input.dataset.group = field
                 }
                 rectanglesForm.append(input)
             }
         }
 
 
-        rectanglesForm.style.gridTemplateColumns = `repeat(${rowsData[0].length + 2}, 1fr)`
-        rectanglesForm.style.gridTemplateRows = `repeat(${rowsData.length + 2}, 1fr)`
-        rectanglesForm.style.width = `${rowsData[0].length*50}px`
+        rectanglesForm.style.gridTemplateColumns = `20px repeat(${rowsData[0].length}, ${fieldSize}px) 20px`
+        rectanglesForm.style.gridTemplateRows = `repeat(${rowsData.length + 2}, ${fieldSize}px)`
 
         setInitialData()
     }
@@ -61,6 +87,7 @@ fieldSizeForm.addEventListener('input', (e) => {
         rangeElement.value = e.target.value
     }
 })
+
 
 fieldSizeForm.addEventListener('submit', (e) => {
     e.preventDefault()
@@ -85,14 +112,13 @@ fieldSizeForm.addEventListener('submit', (e) => {
         input.style.gridRow = rowNum
     }
 
-    rectanglesForm.style.gridTemplateColumns = `repeat(${columns + 2}, 1fr)`
-    rectanglesForm.style.gridTemplateRows = `repeat(${rows + 2}, 1fr)`
-    rectanglesForm.style.width = `${columns*50}px`
+    rectanglesForm.style.gridTemplateColumns = `20px repeat(${columns}, ${fieldSize}px) 20px`
+    rectanglesForm.style.gridTemplateRows = `repeat(${rows + 2}, ${fieldSize}px)`
 
 
-    // localStorage.setItem('rectangles-form-style', JSON.stringify({columns: rectanglesForm.style.gridTemplateColumns, rows: rectanglesForm.style.gridTemplateRows, width: rectanglesForm.style.width}))
-    // localStorage.setItem('rectangles-form', JSON.stringify(rectanglesForm.innerHTML))
     setRows()
+    setGroupsData()
+    getGroupsParameters()
 
     perimeterText.textContent  = 0
     areaText.textContent  = 0
@@ -100,25 +126,17 @@ fieldSizeForm.addEventListener('submit', (e) => {
 
 
 rectanglesForm.addEventListener('input', (e) => {
-    const columnsAmount = Number(fieldSizeForm.querySelector('#columns-field').value)
-    const inputs = [...rectanglesForm.querySelectorAll('input[type=checkbox]')]
-
-    const rowsEl = []
-
-    for (let i = 0; i < inputs.length; i+=columnsAmount) {
-        const row = inputs.slice(i, i + columnsAmount)
-        rowsEl.push(row)
-    }
-
     const field = e.target
     changeGroup(field)
 
     setInitialData()
 })
 
+
 function setInitialData() {
     setMeasurments()
     setInputsGroups()
+    setGroupsData()
 
     getParameters()
     getGroupsParameters()
@@ -164,6 +182,33 @@ function setInputsGroups() {
     }
 
     setInputsBorders()
+}
+
+function setGroupsData() {
+    const inputsEl = [...document.querySelectorAll('[data-group]')]
+    const groupsEl = Object.values(Object.groupBy(inputsEl, inputEl => inputEl.dataset.group))
+    const groupsData = []
+    
+    for (let i = 0; i < groupsEl.length; i++) {
+        const groupEl = groupsEl[i];
+        const { backgroundColor: classStyle } = getComputedStyle(groupEl[0]);
+
+        const groupData = {
+            group: groupEl[0].dataset.group,
+            fields: [],
+            color: classStyle
+        }
+        
+        for (let j = 0; j < groupEl.length; j++) {
+            const input = groupEl[j];
+
+            const field = {row: Number(input.dataset.row), col: Number(input.dataset.column)}
+            groupData.fields.push(field)
+        }
+        groupsData.push(groupData)
+    }
+
+    localStorage.setItem('groups-data', JSON.stringify(groupsData))
 }
 
 
@@ -297,6 +342,8 @@ function changeGroup(input) {
             }
         }
 
+        const longestGroup = groups.reduce((result, group) => result.length > group.length ? result : group)
+
         groups.forEach(group => {
             const skippedGroupsIds = getSkippedGroupsIds(allGroupIds)
             let groupId
@@ -306,9 +353,13 @@ function changeGroup(input) {
             } else {
                 groupId = Math.max(...allGroupIds) + 1
             }
-            group.forEach(field => {
-                rows[field.row].splice(field.col, 1, groupId)
-            })
+
+            if (longestGroup !== group) {
+                group.forEach(field => {
+                    rows[field.row].splice(field.col, 1, groupId)
+                })
+
+            }
             allGroupIds.push(groupId)
         })
     }
@@ -368,7 +419,6 @@ function setMeasurments() {
 
     const rows = JSON.parse(localStorage.getItem('rows'));
     const columns = rows[0].map((_, index) => rows.map(row => row[index]));
-    
 
     createMeasurmentText(rows, 'row')
     createMeasurmentText(columns, 'column')
@@ -387,10 +437,10 @@ function createMeasurmentText(rows, className) {
 
         for (let j = 0; j < row.length; j++) {
             const field = row[j];
-            const {topField} = getNeighborFields(rows, i, j).fields
+            const topField = rows[i - 1] ? rows[i - 1][j] : 0
 
             if (field > 0) {
-                if ((topField === 0 || !topField)) {
+                if ((topField === 0)) {
                     if (!startColIndex && !rowIndex && !group) {
                         group = field
                         startColIndex = j
@@ -436,10 +486,10 @@ function createMeasurmentText(rows, className) {
 
         for (let j = 0; j < row.length; j++) {
             const field = row[j];
-            const {bottomField} = getNeighborFields(rows, i, j).fields
-     
+            const bottomField = rows[i + 1] ? rows[i + 1][j] : 0
+            
             if (field > 0) {
-                if (bottomField === 0 || !bottomField) {
+                if (bottomField === 0) {
                     if (!startColIndex2 && !rowIndex2 && !group2) {
                         group2 = field
                         startColIndex2 = j
@@ -497,7 +547,7 @@ function createMeasurmentText(rows, className) {
 
             }
         } else {
-            text.style.gridColumnStart = gridColumn
+            text.style.gridColStart = gridColumn
             text.style.gridColumnEnd = gridColumn + spanWidth;
 
             if (position === 'bottom') {
@@ -513,7 +563,6 @@ function createMeasurmentText(rows, className) {
 
         rectanglesForm.append(text);
     }
-
 } 
 
 
@@ -569,10 +618,9 @@ function getGroupsParameters() {
     })
 
     const groupsData = JSON.parse(localStorage.getItem('groups-data'))
+
     const rows = JSON.parse(localStorage.getItem('rows'))
-
     const groupsParameters = document.getElementById('groups-parameters')
-
 
     for (let i = 0; i < groupsData.length; i++) {
         const group = groupsData[i];
@@ -636,6 +684,120 @@ function getGroupsParameters() {
         const minRow = group.fields.reduce((min, field) => field.row < min.row ? field : min).row
         const minCol = group.fields.reduce((min, field) => field.col < min.col ? field : min).col
 
+
+
+        const wrapper = document.createElement('div')
+        wrapper.classList.add('measurment')
+        const area = document.createElement('p')
+        area.textContent = `S: ${groupArea}`
+        const perimeter = document.createElement('p')
+        perimeter.textContent = `P: ${groupPerimeter}`
+
+        wrapper.append(area, perimeter)
+        rectanglesForm.append(wrapper)
+
+     
+        const rowMiddle = Math.floor((maxRow+minRow)/2)
+        const colMiddle = Math.floor((maxCol+minCol)/2)
+
+    
+        
+        function getPositions(rowStart, colStart) {
+            return [
+                {row: rowStart, col: colStart},
+                {row: rowStart - 1, col: colStart},
+                {row: rowStart + 1, col: colStart},
+                {row: rowStart, col: colStart - 1},
+                {row: rowStart, col: colStart + 1},
+            ]
+        }
+   
+        const positions = getPositions(rowMiddle, colMiddle)
+
+        let rowStart
+        let rowEnd
+        let colStart
+        let colEnd
+
+        for (let i = 0; i < positions.length; i++) {
+            const position = positions[i]
+            const { row, col } = position
+            const middleField = group.fields.find(field => field.row === row && field.col === col)
+        
+            if (middleField) {
+                console.log("Middle field:", middleField);
+                const rowIndex = middleField.row
+                const colIndex = middleField.col
+
+
+                const topExists = group.fields.some(field => field.row === rowIndex - 1 && field.col === colIndex)
+
+                const bottomExists = group.fields.some(field => field.row === rowIndex + 1 && field.col === colIndex)
+
+                const leftExists = group.fields.some(field => field.row === rowIndex && field.col === colIndex - 1)
+                const rightExists = group.fields.some(field => field.row === rowIndex && field.col === colIndex + 1)
+
+                rowStart = rowIndex
+                rowEnd = rowIndex + 1
+                colStart = colIndex
+                colEnd = colIndex + 1
+
+                if (bottomExists) {
+                    const sameColItems = group.fields.filter(field => field.col === colIndex)
+
+                    if (sameColItems.length % 2 === 0) {
+                        rowEnd = rowIndex + 2
+                    }
+
+                    if (rightExists && !leftExists) {
+                        const bottomRight = group.fields.some(field => field.row === rowIndex + 1 && field.col === colIndex + 1)
+                        
+                        if (bottomRight) {
+                            colEnd = colIndex + 2
+                        }
+                    } else if (leftExists && !rightExists) {
+                        const bottomRight = group.fields.some(field => field.row === rowIndex + 1 && field.col === colIndex - 1)
+                        
+                        if (bottomRight) {
+                            colStart = colIndex - 1
+                        }
+                    }    
+                } else if (topExists) {
+                    rowStart = rowIndex - 1
+
+                    if (rightExists && !leftExists) {
+                        const topRight = group.fields.some(field => field.row === rowIndex - 1 && field.col === colIndex + 1)
+    
+                        if (topRight) {
+                            colEnd = colIndex + 2
+                        }
+                    } else if (leftExists && !rightExists) {
+                        const topLeft = group.fields.some(field => field.row === rowIndex - 1 && field.col === colIndex - 1)
+
+                        if (topLeft) {
+                            colStart = colIndex - 1
+                        }
+                    }
+                } else if (rightExists) {
+                    const sameRowItems = group.fields.filter(field => field.row === rowIndex)
+                    if (sameRowItems.length % 2 === 0) {
+                        colEnd = colIndex + 2
+                    }
+                } else if (leftExists) {
+                    colStart = colIndex - 1
+                }
+                break;
+            }
+        }
+        console.log(`rowS: ${rowStart}, rowE: ${rowEnd}, colS: ${colStart}, colE: ${colEnd}`);
+        
+        wrapper.style.gridRowStart = rowStart
+        wrapper.style.gridRowEnd = rowEnd
+        wrapper.style.gridColumnStart = colStart
+        wrapper.style.gridColumnEnd = colEnd
+
+
+
         const rowsLength = maxRow - minRow + 1
         const colsLength = maxCol - minCol + 1
 
@@ -644,14 +806,10 @@ function getGroupsParameters() {
 
         for (let i = 0; i < rowsLength; i++) {
             for (let j = 0; j < colsLength; j++) {
-                const element = document.createElement('element')
-                element.setAttribute('type', 'checkbox')
-                element.setAttribute('disabled', true)
-                
+                const element = document.createElement('span')
                 
                 group.fields.forEach(field => {
                     if (field.row - minRow === i && field.col - minCol === j) {
-                        element.setAttribute('checked', true)
                         element.style.backgroundColor = group.color
                     }
                 })

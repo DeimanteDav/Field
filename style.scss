@@ -60,8 +60,17 @@
     
         .measurment {
             pointer-events: none;
-            font-size: 13px;
-    
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            p {
+                margin: 0;
+                padding: 3px 0;
+            }
+
             &.row {
                 justify-self: center;
     
@@ -177,7 +186,7 @@
             .group-grid {
                 display: grid;
                 gap: 1px;
-                input[type="checkbox"] {
+                span {
                     display: inline-block; 
                     appearance: none;
                     margin: 0;
