@@ -14,6 +14,7 @@ This project is a vanilla JavaScript application for calculating perimeter and a
 
 ## Visualizations
 
+![Grid](images/grid-checkboxes.png)
 ![Grouped Mirrored Elements with Perimeters](images/grid-groups.png)
 
 ## Usage
