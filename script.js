@@ -6,29 +6,6 @@ let areaText = document.getElementById('area')
 const fieldSize = 50
 
 
-
-/*
-    vanilla javascript project
-
-    scss naudojamas. ciklai funkcija 
-
-    Perimetro ir ploto skaiciuokle pagal sukurta grida.
-    bendras plotas ir kiekvienos figuros atskirai.
-    input checkboxes naudojami.
-    css grid,
-    elementai susijungia kai atsitoja vienas kito. spalvos susijungia.
-    figuru mirroring
-    local storage naudojamas 
-*/
-
-
-// ant grupiu uzdet PLOTA IR PERIMETRA per viduri
-// atcheckinus kad nepasikeistu spalva ilgiausio elemento
-
-
-// 
-
-
 function getDataFromLocalStorage(rectanglesForm) {
     const parameters = JSON.parse(localStorage.getItem('parameters'))
     const rowsData = JSON.parse(localStorage.getItem('rows'))
@@ -356,7 +333,6 @@ function changeGroup(input) {
                 groupId = Math.max(...allGroupIds) + 1
             }
 
-            console.log(longestGroup, group);
             if (longestGroup !== group) {
                 group.forEach(field => {
                     rows[field.row].splice(field.col, 1, groupId)
@@ -657,7 +633,6 @@ function getGroupsParameters() {
             groupPerimeter += fieldPerimeter
         }
 
-
         
         const groupParameters = document.createElement('div')
         groupParameters.className = 'group-parameters'
@@ -686,7 +661,6 @@ function getGroupsParameters() {
 
         const minRow = group.fields.reduce((min, field) => field.row < min.row ? field : min).row
         const minCol = group.fields.reduce((min, field) => field.col < min.col ? field : min).col
-
 
 
         const wrapper = document.createElement('div')
@@ -728,13 +702,10 @@ function getGroupsParameters() {
             const middleField = group.fields.find(field => field.row === row && field.col === col)
         
             if (middleField) {
-                console.log("Middle field:", middleField);
                 const rowIndex = middleField.row
                 const colIndex = middleField.col
 
-
                 const topExists = group.fields.some(field => field.row === rowIndex - 1 && field.col === colIndex)
-
                 const bottomExists = group.fields.some(field => field.row === rowIndex + 1 && field.col === colIndex)
 
                 const leftExists = group.fields.some(field => field.row === rowIndex && field.col === colIndex - 1)
@@ -792,14 +763,11 @@ function getGroupsParameters() {
                 break;
             }
         }
-        console.log(`rowS: ${rowStart}, rowE: ${rowEnd}, colS: ${colStart}, colE: ${colEnd}`);
         
         wrapper.style.gridRowStart = rowStart
         wrapper.style.gridRowEnd = rowEnd
         wrapper.style.gridColumnStart = colStart
         wrapper.style.gridColumnEnd = colEnd
-
-
 
         const rowsLength = maxRow - minRow + 1
         const colsLength = maxCol - minCol + 1
