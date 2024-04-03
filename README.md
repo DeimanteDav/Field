@@ -14,7 +14,7 @@ This project is a vanilla JavaScript application for calculating perimeter and a
 
 ## Visualizations
 
-![Grouped Mirrored Elements with Perimeters](grid-groups.png)
+![Grouped Mirrored Elements with Perimeters](images/grid-groups.png)
 
 ## Usage
 
