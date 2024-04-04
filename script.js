@@ -1,32 +1,12 @@
 const fieldSizeForm = document.getElementById('custom-size-form')
-let rectanglesForm = document.getElementById('rectangles-form')
-let perimeterText = document.getElementById('perimeter');
-let areaText = document.getElementById('area')
+const rectanglesForm = document.getElementById('rectangles-form')
+
+const parametersWrapper = document.getElementById('parameters')
+parametersWrapper.style.display = 'none'
+const perimeterText = document.getElementById('perimeter');
+const areaText = document.getElementById('area')
 
 const fieldSize = 50
-
-
-
-/*
-    vanilla javascript project
-
-    scss naudojamas. ciklai funkcija 
-
-    Perimetro ir ploto skaiciuokle pagal sukurta grida.
-    bendras plotas ir kiekvienos figuros atskirai.
-    input checkboxes naudojami.
-    css grid,
-    elementai susijungia kai atsitoja vienas kito. spalvos susijungia.
-    figuru mirroring
-    local storage naudojamas 
-*/
-
-
-// ant grupiu uzdet PLOTA IR PERIMETRA per viduri
-// atcheckinus kad nepasikeistu spalva ilgiausio elemento
-
-
-// 
 
 
 function getDataFromLocalStorage(rectanglesForm) {
@@ -70,6 +50,8 @@ function getDataFromLocalStorage(rectanglesForm) {
         rectanglesForm.style.gridTemplateRows = `repeat(${rowsData.length + 2}, ${fieldSize}px)`
 
         setInitialData()
+    } else {
+
     }
    
 }
@@ -91,37 +73,48 @@ fieldSizeForm.addEventListener('input', (e) => {
 
 fieldSizeForm.addEventListener('submit', (e) => {
     e.preventDefault()
-    rectanglesForm.innerHTML =''
-
     let columns = Number(e.target['columns-field'].value)
     let rows = Number(e.target['rows-field'].value)
 
-    localStorage.setItem('parameters', JSON.stringify({columns, rows}))
-    let fieldsAmount = columns * rows
+    const previousError = fieldSizeForm.querySelector('.error')
+    previousError && previousError.remove()
 
+    if (columns > 0 && rows > 0) {
+        localStorage.setItem('parameters', JSON.stringify({columns, rows}))
+        let fieldsAmount = columns * rows
+    
+        rectanglesForm.innerHTML =''
+        parametersWrapper.style.display = 'block'
+ 
+        perimeterText.textContent  = 0
+        areaText.textContent  = 0
 
-    for (let i = 0; i < fieldsAmount; i++) {
-        const columnNum = (i % columns) + 2
-        const rowNum = Math.floor((i / columns) + 2)
-        const input = document.createElement('input')
-        input.setAttribute('type', 'checkbox')
-        input.dataset.row = rowNum
-        input.dataset.column = columnNum
-        rectanglesForm.append(input)
-        input.style.gridColumn = columnNum
-        input.style.gridRow = rowNum
+        for (let i = 0; i < fieldsAmount; i++) {
+            const columnNum = (i % columns) + 2
+            const rowNum = Math.floor((i / columns) + 2)
+            const input = document.createElement('input')
+            input.setAttribute('type', 'checkbox')
+            input.dataset.row = rowNum
+            input.dataset.column = columnNum
+            rectanglesForm.append(input)
+            input.style.gridColumn = columnNum
+            input.style.gridRow = rowNum
+        }
+    
+        rectanglesForm.style.gridTemplateColumns = `20px repeat(${columns}, ${fieldSize}px) 20px`
+        rectanglesForm.style.gridTemplateRows = `repeat(${rows + 2}, ${fieldSize}px)`
+    
+    
+        setRows()
+        setGroupsData()
+        getGroupsParameters()
+    } else {
+        const errorText = document.createElement('p')
+        errorText.classList.add('error')
+        errorText.textContent = 'Columns and/or rows amounts are not above 0'
+
+        fieldSizeForm.append(errorText)
     }
-
-    rectanglesForm.style.gridTemplateColumns = `20px repeat(${columns}, ${fieldSize}px) 20px`
-    rectanglesForm.style.gridTemplateRows = `repeat(${rows + 2}, ${fieldSize}px)`
-
-
-    setRows()
-    setGroupsData()
-    getGroupsParameters()
-
-    perimeterText.textContent  = 0
-    areaText.textContent  = 0
 })
 
 
@@ -356,7 +349,6 @@ function changeGroup(input) {
                 groupId = Math.max(...allGroupIds) + 1
             }
 
-            console.log(longestGroup, group);
             if (longestGroup !== group) {
                 group.forEach(field => {
                     rows[field.row].splice(field.col, 1, groupId)
@@ -657,7 +649,6 @@ function getGroupsParameters() {
             groupPerimeter += fieldPerimeter
         }
 
-
         
         const groupParameters = document.createElement('div')
         groupParameters.className = 'group-parameters'
@@ -688,15 +679,14 @@ function getGroupsParameters() {
         const minCol = group.fields.reduce((min, field) => field.col < min.col ? field : min).col
 
 
-
         const wrapper = document.createElement('div')
         wrapper.classList.add('measurment')
-        const area = document.createElement('p')
-        area.textContent = `S: ${groupArea}`
         const perimeter = document.createElement('p')
         perimeter.textContent = `P: ${groupPerimeter}`
+        const area = document.createElement('p')
+        area.textContent = `A: ${groupArea}`
 
-        wrapper.append(area, perimeter)
+        wrapper.append(perimeter, area)
         rectanglesForm.append(wrapper)
 
      
@@ -728,13 +718,10 @@ function getGroupsParameters() {
             const middleField = group.fields.find(field => field.row === row && field.col === col)
         
             if (middleField) {
-                console.log("Middle field:", middleField);
                 const rowIndex = middleField.row
                 const colIndex = middleField.col
 
-
                 const topExists = group.fields.some(field => field.row === rowIndex - 1 && field.col === colIndex)
-
                 const bottomExists = group.fields.some(field => field.row === rowIndex + 1 && field.col === colIndex)
 
                 const leftExists = group.fields.some(field => field.row === rowIndex && field.col === colIndex - 1)
@@ -792,14 +779,11 @@ function getGroupsParameters() {
                 break;
             }
         }
-        console.log(`rowS: ${rowStart}, rowE: ${rowEnd}, colS: ${colStart}, colE: ${colEnd}`);
         
         wrapper.style.gridRowStart = rowStart
         wrapper.style.gridRowEnd = rowEnd
         wrapper.style.gridColumnStart = colStart
         wrapper.style.gridColumnEnd = colEnd
-
-
 
         const rowsLength = maxRow - minRow + 1
         const colsLength = maxCol - minCol + 1

@@ -47,6 +47,10 @@
                 background: #f6f6f7;
             }
         }
+
+        .error {
+            color: red;
+        }
     }
     
     @function hslColor($hue: 0, $saturation: 100%, $lightness: 50%) {
