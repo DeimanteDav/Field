@@ -1,7 +1,10 @@
 const fieldSizeForm = document.getElementById('custom-size-form')
-let rectanglesForm = document.getElementById('rectangles-form')
-let perimeterText = document.getElementById('perimeter');
-let areaText = document.getElementById('area')
+const rectanglesForm = document.getElementById('rectangles-form')
+
+const parametersWrapper = document.getElementById('parameters')
+parametersWrapper.style.display = 'none'
+const perimeterText = document.getElementById('perimeter');
+const areaText = document.getElementById('area')
 
 const fieldSize = 50
 
@@ -47,6 +50,8 @@ function getDataFromLocalStorage(rectanglesForm) {
         rectanglesForm.style.gridTemplateRows = `repeat(${rowsData.length + 2}, ${fieldSize}px)`
 
         setInitialData()
+    } else {
+
     }
    
 }
@@ -68,37 +73,48 @@ fieldSizeForm.addEventListener('input', (e) => {
 
 fieldSizeForm.addEventListener('submit', (e) => {
     e.preventDefault()
-    rectanglesForm.innerHTML =''
-
     let columns = Number(e.target['columns-field'].value)
     let rows = Number(e.target['rows-field'].value)
 
-    localStorage.setItem('parameters', JSON.stringify({columns, rows}))
-    let fieldsAmount = columns * rows
+    const previousError = fieldSizeForm.querySelector('.error')
+    previousError && previousError.remove()
 
+    if (columns > 0 && rows > 0) {
+        localStorage.setItem('parameters', JSON.stringify({columns, rows}))
+        let fieldsAmount = columns * rows
+    
+        rectanglesForm.innerHTML =''
+        parametersWrapper.style.display = 'block'
+ 
+        perimeterText.textContent  = 0
+        areaText.textContent  = 0
 
-    for (let i = 0; i < fieldsAmount; i++) {
-        const columnNum = (i % columns) + 2
-        const rowNum = Math.floor((i / columns) + 2)
-        const input = document.createElement('input')
-        input.setAttribute('type', 'checkbox')
-        input.dataset.row = rowNum
-        input.dataset.column = columnNum
-        rectanglesForm.append(input)
-        input.style.gridColumn = columnNum
-        input.style.gridRow = rowNum
+        for (let i = 0; i < fieldsAmount; i++) {
+            const columnNum = (i % columns) + 2
+            const rowNum = Math.floor((i / columns) + 2)
+            const input = document.createElement('input')
+            input.setAttribute('type', 'checkbox')
+            input.dataset.row = rowNum
+            input.dataset.column = columnNum
+            rectanglesForm.append(input)
+            input.style.gridColumn = columnNum
+            input.style.gridRow = rowNum
+        }
+    
+        rectanglesForm.style.gridTemplateColumns = `20px repeat(${columns}, ${fieldSize}px) 20px`
+        rectanglesForm.style.gridTemplateRows = `repeat(${rows + 2}, ${fieldSize}px)`
+    
+    
+        setRows()
+        setGroupsData()
+        getGroupsParameters()
+    } else {
+        const errorText = document.createElement('p')
+        errorText.classList.add('error')
+        errorText.textContent = 'Columns and/or rows amounts are not above 0'
+
+        fieldSizeForm.append(errorText)
     }
-
-    rectanglesForm.style.gridTemplateColumns = `20px repeat(${columns}, ${fieldSize}px) 20px`
-    rectanglesForm.style.gridTemplateRows = `repeat(${rows + 2}, ${fieldSize}px)`
-
-
-    setRows()
-    setGroupsData()
-    getGroupsParameters()
-
-    perimeterText.textContent  = 0
-    areaText.textContent  = 0
 })
 
 
@@ -665,12 +681,12 @@ function getGroupsParameters() {
 
         const wrapper = document.createElement('div')
         wrapper.classList.add('measurment')
-        const area = document.createElement('p')
-        area.textContent = `S: ${groupArea}`
         const perimeter = document.createElement('p')
         perimeter.textContent = `P: ${groupPerimeter}`
+        const area = document.createElement('p')
+        area.textContent = `A: ${groupArea}`
 
-        wrapper.append(area, perimeter)
+        wrapper.append(perimeter, area)
         rectanglesForm.append(wrapper)
 
      

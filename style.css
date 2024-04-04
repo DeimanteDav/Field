@@ -41,6 +41,9 @@
 .container #custom-size-form #custom-field-btn:hover {
   background: #f6f6f7;
 }
+.container #custom-size-form .error {
+  color: red;
+}
 .container #rectangles-form {
   width: auto;
   display: grid;
