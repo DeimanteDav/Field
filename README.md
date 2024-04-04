@@ -15,11 +15,11 @@ This project is a vanilla JavaScript application for calculating perimeter and a
 
 ## Visualizations
 <!-- checkbox inputs, css grid -->
-- **Grid creation with Checkbox Inputs**
-    - ![Grid](images/checkbox-inputs.png)
+### **Grid creation with Checkbox Inputs**
+![Grid](images/checkbox-inputs.png)
 
-- Dynamic Element Interaction
-    - ![Grouped Mirrored Elements with Perimeters](images/mirrored-groups.png)
+### Dynamic Element Interaction
+![Grouped Mirrored Elements with Perimeters](images/mirrored-groups.png)
 
 ## Usage
 
